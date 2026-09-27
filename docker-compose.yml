@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: handup-db
+    environment:
+      POSTGRES_USER: handup
+      POSTGRES_PASSWORD: handup
+      POSTGRES_DB: handup
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U handup"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: handup-api
+    environment:
+      DATABASE_URL: postgresql+psycopg://handup:handup@db:5432/handup
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      CORS_ORIGINS: http://localhost:3035,http://127.0.0.1:3035
+      SEED_ON_START: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8035:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/api/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8035}
+    container_name: handup-web
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8035}
+      INTERNAL_API_URL: http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "3035:3000"
+    restart: unless-stopped
+
+volumes:
+  db-data:

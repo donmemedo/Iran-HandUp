@@ -1,0 +1,15 @@
+{
+  "name": "دست‌یار | HandUp Iran",
+  "short_name": "دست‌یار",
+  "description": "پلتفرم کمک هدفمند، شفاف و قابل ردیابی",
+  "start_url": "/fa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a0910",
+  "theme_color": "#ff5c38",
+  "dir": "rtl",
+  "lang": "fa",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
